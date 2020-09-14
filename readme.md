@@ -15,14 +15,6 @@ Get dependencies:
 pip install -r requirements.txt
 ```
 
-Setup directories for downloading and caching emailed reports:
-```
-mkdir data_temp
-mkdir data_archived
-```
-
-NOTE: these should match the directories configured in the ``DATA_TMP_DIR`` and ``DATA_ARCH_DIR`` fields in  ``process_surfgaurd_email.json``. **This step can be omitted as script has been updated to auto-create these directories if they do not exist (needed for Heroku's ephemeral storage).**
-
 Setup chosen gmail account account for oAuth2 by following  instructions in the following link:  https://developers.google.com/gmail/api/auth/about-auth
 
 Once you have the ``USER``, ``CLIENT_ID`` and ``CLIENT_SECRET``, you will need to generate the ``REFRESH_TOKEN`` using the following command:
@@ -50,6 +42,13 @@ python process_surfgaurd_email.py
 * Push to deploy on Heroku
 * Set Heroku environment variables for ``USER``, ``CLIENT_ID``, ``CLIENT_SECRET`` and ``REFRESH_TOKEN`` (so that they do not need to be set in the config file and saved to the git repository, as Heroku file storage is ephemeral and gets wiped with each deployment)
 * Setup Heroku Scheduler add-on to execute at desired frequency (daily)
+
+To set up Heroku Scheduler:
+1. `Configure Add-ons > Heroku Scheduler > Add Job/edit`
+1. Setup schedule:
+   * Every dat at... `6:00 PM UTC` (translates to 5am AEDT / 4am AEST)
+   * Run command: `python process_surfgaurd_email.py`
+   * With `Standard-1X` (only runs for a few seconds each day)
 
 ## How it works: ##
 
