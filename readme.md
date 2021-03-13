@@ -51,16 +51,18 @@ python process_surfguard_email.py
 ```
 
 ## Deployment on Heroku ##
+
 * Add Heroku remote
 * Push to deploy on Heroku
 * Set Heroku environment variables for ``USER``, ``CLIENT_ID``, ``CLIENT_SECRET`` and ``REFRESH_TOKEN`` (so that they do not need to be set in the config file and saved to the git repository, as Heroku file storage is ephemeral and gets wiped with each deployment)
 * Setup Heroku Scheduler add-on to execute at desired frequency (daily)
 
 To set up Heroku Scheduler:
+
 1. `Configure Add-ons > Heroku Scheduler > Add Job/edit`
 1. Setup schedule:
    * Every dat at... `6:00 PM UTC` (translates to 5am AEDT / 4am AEST)
-   * Run command: `python process_surfgaurd_email.py`
+   * Run command: `python process_surfguard_email.py`
    * With `Standard-1X` (only runs for a few seconds each day)
 
 ## How it works ##
@@ -76,7 +78,7 @@ To set up Heroku Scheduler:
     1. Uploads it to the relevant endpoint (``post_endpoint`` in the config file)
     1. Renames and moves it to the archive directory (``DATA_ARCH_DIR`` & ``fname`` in the config file)
 
-## TODOS ##
+## TODO ##
 
 * add more detailed info to the Heroku deployment section.
 * Uncomment and test line# 80 of process_surfguard_reports.py to actually perform HTTP post to Swapsea API
