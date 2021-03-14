@@ -89,7 +89,7 @@ def process_surfguard_reports(filetypes, header_line_no, tempdir, archdir, swaps
 
 if __name__ == '__main__':
     cfg = get_json_config('process_surfguard_email.json')
-    #cfg = get_json_config('process_surfguard_email-swapsea.json')
+
     # create directories if they do not exist
     if not os.path.exists(cfg['DATA_TMP_DIR']):
         os.makedirs(cfg['DATA_TMP_DIR'])
