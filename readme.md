@@ -10,7 +10,6 @@ Swapsea is a superior, award-winning patrol swap system for Australian Surf Life
 Create a virtual environment to sandbox this script:
 
 ```bash
-cd swapsea-v2/plugins/surfguard_reports
 sudo easy_install pip         # install pip
 sudo pip install virtualenv   # install virtualenv
 virtualenv env                # create env

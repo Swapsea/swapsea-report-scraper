@@ -1,6 +1,6 @@
 from google_oauth2 import RefreshToken, GenerateOAuth2String, TestImapAuthentication, imaplib
 from email.parser import HeaderParser
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import re
 import urllib2
 import urllib
@@ -47,8 +47,8 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
             try:
                 print ("  Found link: {}".format(f))
                 resp = urllib2.urlopen(f)
-                soup = BeautifulSoup(resp)
-                for link in soup.findAll('a', href=True):
+                soup = BeautifulSoup(resp, 'html.parser')
+                for link in soup.find_all('a', href=True):
                     file_link = link.get('href',None)
                     if os.path.splitext(file_link)[1].lower()=='.csv':
                         tmpfile = os.path.join(savedir,os.path.basename(file_link))
@@ -106,6 +106,6 @@ if __name__ == '__main__':
 
     swapsea_url = os.environ.get('SWAPSEA_URL', cfg['SWAPSEA_URL'])
 
-    imap_conn = get_imap_conn(os.environ.get('USER_EMAIL',cfg['USER']), access_token)
+    imap_conn = get_imap_conn(os.environ.get('USER_EMAIL',cfg['USER_EMAIL']), access_token)
     save_surfguard_reports_from_email(imap_conn, cfg['SEARCH_FOR'], cfg['DATA_TMP_DIR'])
     process_surfguard_reports(cfg['FILETYPES'], cfg['HEADER_LINE_NO'], cfg['DATA_TMP_DIR'], cfg['DATA_ARCH_DIR'], swapsea_url, swapsea_auth)
