@@ -6,7 +6,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-     # http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -113,6 +113,12 @@ def SetupOptionParser():
                     default=None,
                     help='email address of user whose account is being '
                          'accessed')
+  parser.add_option('--quiet',
+                    action='store_true',
+                    default=False,
+                    dest='quiet',
+                    help='Omit verbose descriptions and only print '
+                         'machine-readable outputs.')
   return parser
 
 
@@ -205,7 +211,7 @@ def AuthorizeTokens(client_id, client_secret, authorization_code):
   params['grant_type'] = 'authorization_code'
   request_url = AccountsUrl('o/oauth2/token')
 
-  response = urllib.urlopen(request_url, urllib.urlencode(params)).read()
+  response = urllib.request.urlopen(request_url, urllib.parse.urlencode(params)).read()
   return json.loads(response)
 
 
@@ -229,7 +235,7 @@ def RefreshToken(client_id, client_secret, refresh_token):
   params['grant_type'] = 'refresh_token'
   request_url = AccountsUrl('o/oauth2/token')
 
-  response = urllib.urlopen(request_url, urllib.urlencode(params)).read()
+  response = urllib.request.urlopen(request_url, urllib.parse.urlencode(params)).read()
   return json.loads(response)
 
 
@@ -288,7 +294,7 @@ def TestSmtpAuthentication(user, auth_string):
 def RequireOptions(options, *args):
   missing = [arg for arg in args if getattr(options, arg) is None]
   if missing:
-    print 'Missing options: %s' % ' '.join(missing)
+    print ('Missing options: %s' % ' '.join(missing))
     sys.exit(-1)
 
 
@@ -299,35 +305,41 @@ def main(argv):
     RequireOptions(options, 'client_id', 'client_secret')
     response = RefreshToken(options.client_id, options.client_secret,
                             options.refresh_token)
-    print 'Access Token: %s' % response['access_token']
-    print 'Access Token Expiration Seconds: %s' % response['expires_in']
+    if options.quiet:
+      print (response['access_token'])
+    else:
+      print ('Access Token: %s' % response['access_token'])
+      print ('Access Token Expiration Seconds: %s' % response['expires_in'])
   elif options.generate_oauth2_string:
     RequireOptions(options, 'user', 'access_token')
-    print ('OAuth2 argument:\n' +
-           GenerateOAuth2String(options.user, options.access_token))
+    oauth2_string = GenerateOAuth2String(options.user, options.access_token)
+    if options.quiet:
+      print (oauth2_string)
+    else:
+      print ('OAuth2 argument:\n' + oauth2_string)
   elif options.generate_oauth2_token:
     RequireOptions(options, 'client_id', 'client_secret')
-    print 'To authorize token, visit this url and follow the directions:'
-    print '  %s' % GeneratePermissionUrl(options.client_id, options.scope)
+    print ('To authorize token, visit this url and follow the directions:')
+    print ('  %s' % GeneratePermissionUrl(options.client_id, options.scope))
     authorization_code = raw_input('Enter verification code: ')
     response = AuthorizeTokens(options.client_id, options.client_secret,
-                                authorization_code)
-    print 'Refresh Token: %s' % response['refresh_token']
-    print 'Access Token: %s' % response['access_token']
-    print 'Access Token Expiration Seconds: %s' % response['expires_in']
+                               authorization_code)
+    print ('Refresh Token: %s' % response['refresh_token'])
+    print ('Access Token: %s' % response['access_token'])
+    print ('Access Token Expiration Seconds: %s' % response['expires_in'])
   elif options.test_imap_authentication:
     RequireOptions(options, 'user', 'access_token')
     TestImapAuthentication(options.user,
-        GenerateOAuth2String(options.user, options.access_token,
-                             base64_encode=False))
+                           GenerateOAuth2String(options.user, options.access_token,
+                                                base64_encode=False))
   elif options.test_smtp_authentication:
     RequireOptions(options, 'user', 'access_token')
     TestSmtpAuthentication(options.user,
-        GenerateOAuth2String(options.user, options.access_token,
-                             base64_encode=False))
+                           GenerateOAuth2String(options.user, options.access_token,
+                                                base64_encode=False))
   else:
     options_parser.print_help()
-    print 'Nothing to do, exiting.'
+    print ('Nothing to do, exiting.')
     return
 
 

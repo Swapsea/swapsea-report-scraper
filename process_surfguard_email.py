@@ -2,7 +2,6 @@ from google_oauth2 import RefreshToken, GenerateOAuth2String, TestImapAuthentica
 from email.parser import HeaderParser
 from bs4 import BeautifulSoup
 import re
-import urllib2
 import urllib
 import os
 import time
@@ -46,7 +45,7 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
         for f in email_urls:
             try:
                 print ("  Found link: {}".format(f))
-                resp = urllib2.urlopen(f)
+                resp = urllib.request.urlopen(f)
                 soup = BeautifulSoup(resp, 'html.parser')
                 for link in soup.find_all('a', href=True):
                     file_link = link.get('href',None)
