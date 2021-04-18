@@ -1,2 +1,3 @@
 .vscode
 data_archived
+*.pyc

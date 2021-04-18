@@ -1,16 +1,16 @@
-from google_oauth2 import RefreshToken, GenerateOAuth2String, TestImapAuthentication, imaplib
-from email.parser import HeaderParser
 from bs4 import BeautifulSoup
-import re
-import urllib2
-import urllib
-import os
-import time
-import glob
-import linecache
-import json
-import traceback
+from email.parser import HeaderParser
+from google_oauth2 import RefreshToken, GenerateOAuth2String, TestImapAuthentication, imaplib
+from shutil import copyfileobj
 from swapsea_api import upload_report
+import glob
+import json
+import linecache
+import os
+import re
+import time
+import traceback
+import urllib
 
 # Get config values from JSON file
 def get_json_config(cfg_filename):
@@ -39,29 +39,45 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
     status, email_ids = imap_conn.search(None, search_for)
     nurls, nemails, nlinks = 0, 0, 0
     for e_id in email_ids[0].split():
-        print ("  Checking email ID: {}".format(e_id))
+        print ("  Parsing email ID: {}".format(e_id))
         nemails += 1
         _, response = imap_conn.fetch(e_id, '(UID BODY[TEXT])')
-        email_urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', response[0][1])
+        email_urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', response[0][1].decode('utf-8') )
         for f in email_urls:
             try:
-                print ("  Found link: {}".format(f))
-                resp = urllib2.urlopen(f)
+                print ("    Fetching link: {}".format(f) )
+                req = urllib.request.Request(
+                    f,
+                    data=None,
+                    headers={
+                        'User-Agent': 'curl/7.64.1'
+                    }
+                )
+                resp = urllib.request.urlopen(req)
                 soup = BeautifulSoup(resp, 'html.parser')
-                for link in soup.find_all('a', href=True):
+                page_links = soup.find_all('a', href=True)
+                for link in page_links:
                     file_link = link.get('href',None)
                     if os.path.splitext(file_link)[1].lower()=='.csv':
                         tmpfile = os.path.join(savedir,os.path.basename(file_link))
-                        print ("  Saving file: {} to {}".format(file_link, tmpfile))
-                        urllib.urlretrieve(file_link, tmpfile)
+                        print ("    Saving file: {} to {}".format(file_link, tmpfile))
+                        req = urllib.request.Request(
+                            file_link,
+                            data=None,
+                            headers={
+                                'User-Agent': 'curl/7.64.1'
+                            }
+                        )
+                        with urllib.request.urlopen(req) as in_stream, open(tmpfile, 'wb') as out_file:
+                            copyfileobj(in_stream, out_file)
                         nlinks += 1
                 nurls += 1
             except Exception as e:
-                print ("*** ERROR with: {}".format(f))
+                print ("  Error fetching: {}".format(f))
                 traceback.print_exc()
         #imap_conn.store(e_id, '-X-GM-LABELS', "\Inbox")  # Archive by removing Inbox label NOT WORKING YET
         #imap_conn.uid('STORE', e_id , '-FLAGS', '(Inbox)')
-    print ("Done processing {} links from {} urls in {} emails...".format(nlinks, nurls, nemails))
+    print ("Done processing {} links from {} urls in {} emails.".format(nlinks, nurls, nemails))
 
 
 # Process files
@@ -82,7 +98,7 @@ def process_surfguard_reports(filetypes, header_line_no, tempdir, archdir, swaps
                 print ("  Renaming from: {} to {}".format(f, fname))
                 os.rename(f, fname)
                 break  # move to next file
-    print ("Done processing {} files...".format(nfiles))
+    print ("Done processing {} files.".format(nfiles))
 
 
 
