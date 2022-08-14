@@ -67,6 +67,7 @@ from optparse import OptionParser
 import smtplib
 import sys
 import urllib
+from urllib.request import urlopen
 
 
 def SetupOptionParser():
@@ -144,12 +145,12 @@ def AccountsUrl(command):
 
 def UrlEscape(text):
     # See OAUTH 5.1 for a definition of which characters need to be escaped.
-    return urllib.quote(text, safe='~-._')
+    return urllib.parse.quote(text, safe='~-._')
 
 
 def UrlUnescape(text):
     # See OAUTH 5.1 for a definition of which characters need to be escaped.
-    return urllib.unquote(text)
+    return urllib.parse.unquote(text)
 
 
 def FormatUrlParams(params):
@@ -162,7 +163,7 @@ def FormatUrlParams(params):
             A URL query string version of the given parameters.
     """
     param_fragments = []
-    for param in sorted(params.iteritems(), key=lambda x: x[0]):
+    for param in sorted(params.items(), key=lambda x: x[0]):
         param_fragments.append('%s=%s' % (param[0], UrlEscape(param[1])))
     return '&'.join(param_fragments)
 
@@ -325,7 +326,7 @@ def main(argv):
         RequireOptions(options, 'client_id', 'client_secret')
         print('To authorize token, visit this url and follow the directions:')
         print('  %s' % GeneratePermissionUrl(options.client_id, options.scope))
-        authorization_code = raw_input('Enter verification code: ')
+        authorization_code = input('Enter verification code: ')
         response = AuthorizeTokens(options.client_id, options.client_secret,
                                    authorization_code)
         print('Refresh Token: %s' % response['refresh_token'])
