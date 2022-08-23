@@ -46,6 +46,7 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
     print("Checking emails...")
     status, email_ids = imap_conn.search(None, search_for)
     nurls, nemails, nlinks = 0, 0, 0
+    user_agent = "'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'"
     for e_id in email_ids[0].split():
         print("  Parsing email ID: {}".format(e_id))
         nemails += 1
@@ -59,7 +60,7 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
                     f,
                     data=None,
                     headers={
-                        'User-Agent': 'curl/7.64.1'
+                        'User-Agent': user_agent
                     }
                 )
                 resp = urllib.request.urlopen(req)
@@ -76,7 +77,7 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
                             file_link,
                             data=None,
                             headers={
-                                'User-Agent': 'curl/7.64.1'
+                                'User-Agent': user_agent
                             }
                         )
                         with urllib.request.urlopen(req) as in_stream, open(tmpfile, 'wb') as out_file:
