@@ -3,7 +3,7 @@
   "CLIENT_ID": "LONG-ALPHANUMERIC-KEY-ENDING-IN.apps.googleusercontent.com",
   "CLIENT_SECRET": "SHORTER-SECRET-KEY",
   "REFRESH_TOKEN": "1/T7jw9642uaiYMvuQD0_522sv7jKN1Cp-OiyEUhDfpVM",
-  "SEARCH_FOR": "(UNSEEN SUBJECT \"SurfGuard Report: Custom Report\")",
+  "SEARCH_FOR": "(UNSEEN SUBJECT \"SurfGuard Report: \")",
   "HEADER_LINE_NO": 5,
   "DATA_TMP_DIR": "data_temp",
   "DATA_ARCH_DIR": "data_archived",
