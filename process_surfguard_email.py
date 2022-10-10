@@ -10,7 +10,7 @@ import os
 import re
 import time
 import traceback
-import urllib
+import requests
 
 # Get config values from JSON file
 
@@ -46,7 +46,7 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
     print("Checking emails...")
     status, email_ids = imap_conn.search(None, search_for)
     nurls, nemails, nlinks = 0, 0, 0
-    user_agent = "'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'"
+
     for e_id in email_ids[0].split():
         print("  Parsing email ID: {}".format(e_id))
         nemails += 1
@@ -56,32 +56,17 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
         for f in email_urls:
             try:
                 print("    Fetching link: {}".format(f))
-                req = urllib.request.Request(
-                    f,
-                    data=None,
-                    headers={
-                        'User-Agent': user_agent
-                    }
-                )
-                resp = urllib.request.urlopen(req)
-                soup = BeautifulSoup(resp, 'html.parser')
-                page_links = soup.find_all('a', href=True)
-                for link in page_links:
+                resp = requests.get(f)
+                soup = BeautifulSoup(resp.content, "lxml")
+                for link in soup.findAll('a', href=True):
                     file_link = link.get('href', None)
                     if os.path.splitext(file_link)[1].lower() == '.csv':
                         tmpfile = os.path.join(
                             savedir, os.path.basename(file_link))
                         print("    Saving file: {} to {}".format(
                             file_link, tmpfile))
-                        req = urllib.request.Request(
-                            file_link,
-                            data=None,
-                            headers={
-                                'User-Agent': user_agent
-                            }
-                        )
-                        with urllib.request.urlopen(req) as in_stream, open(tmpfile, 'wb') as out_file:
-                            copyfileobj(in_stream, out_file)
+                        r = requests.get(file_link)
+                        open(tmpfile, 'wb').write(r.content)
                         nlinks += 1
                 nurls += 1
             except Exception as e:

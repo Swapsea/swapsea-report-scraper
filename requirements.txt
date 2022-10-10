@@ -5,3 +5,4 @@ idna==2.10
 requests==2.25.1
 soupsieve==2.2.1
 urllib3==1.26.5
+lxml  # HTML parser for email reports used in BS4
