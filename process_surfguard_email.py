@@ -4,6 +4,7 @@ from google_oauth2 import RefreshToken, GenerateOAuth2String, TestImapAuthentica
 from shutil import copyfileobj
 from swapsea_api import upload_report
 import glob
+import quopri
 import json
 import linecache
 import os
@@ -20,16 +21,12 @@ def get_json_config(cfg_filename):
         return json.load(data_file)
 
 # Get temporary token from refresh token (valid for 1 hour)
-
-
 def get_oauth2_access_token(client_id, client_secret, refresh_token):
     print("Getting refresh token for: {}".format(client_id))
     resp = RefreshToken(client_id, client_secret, refresh_token)
     return resp['access_token']
 
 # Authenticate connection
-
-
 def get_imap_conn(user, access_token):
     print("IMAP authentication for: {}".format(user))
     auth_string = GenerateOAuth2String(user, access_token, base64_encode=False)
@@ -40,8 +37,6 @@ def get_imap_conn(user, access_token):
     return imap_conn
 
 # Get emails
-
-
 def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
     print("Checking emails...")
     status, email_ids = imap_conn.search(None, search_for)
@@ -52,7 +47,8 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
         nemails += 1
         _, response = imap_conn.fetch(e_id, '(UID BODY[TEXT])')
         email_urls = re.findall(
-            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', response[0][1].decode('utf-8'))
+            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 
+            quopri.decodestring(response[0][1]).decode('utf-8') )
         for f in email_urls:
             try:
                 print("    Fetching link: {}".format(f))
