@@ -47,8 +47,8 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
         nemails += 1
         _, response = imap_conn.fetch(e_id, '(UID BODY[TEXT])')
         email_urls = re.findall(
-            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', 
-            quopri.decodestring(response[0][1]).decode('utf-8') )
+            'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
+            quopri.decodestring(response[0][1]).decode('utf-8'))
         for f in email_urls:
             try:
                 print("    Fetching link: {}".format(f))
@@ -69,7 +69,7 @@ def save_surfguard_reports_from_email(imap_conn, search_for, savedir):
                 print("  Error fetching: {}".format(f))
                 traceback.print_exc()
         # imap_conn.store(e_id, '-X-GM-LABELS', "\Inbox")  # Archive by removing Inbox label NOT WORKING YET
-        #imap_conn.uid('STORE', e_id , '-FLAGS', '(Inbox)')
+        # imap_conn.uid('STORE', e_id , '-FLAGS', '(Inbox)')
     print("Done processing {} links from {} urls in {} emails.".format(
         nlinks, nurls, nemails))
 
